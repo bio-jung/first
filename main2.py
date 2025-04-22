@@ -1,7 +1,4 @@
 import streamlit as st
-st.title('나의 첫 steamlit 프로젝트')
-st.write('안녕 반가와!')
-import streamlit as st
 
 # 질문과 MBTI 차원 연결
 questions = [
