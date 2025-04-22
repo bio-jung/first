@@ -1,60 +1,55 @@
 import streamlit as st
+import pandas as pd
 
-# 질문과 MBTI 차원 연결
-questions = [
-    {"question": "1. 당신은 사람들 사이에서 에너지를 얻는 편인가요?", "dimension": "EI"},
-    {"question": "2. 계획을 세우는 것을 좋아하나요?", "dimension": "JP"},
-    {"question": "3. 새로운 아이디어를 생각하는 것이 흥미로운가요?", "dimension": "SN"},
-    {"question": "4. 타인을 돕는 것을 좋아하나요?", "dimension": "TF"},
-    {"question": "5. 즉흥적인 결정을 잘 내리나요?", "dimension": "JP"},
-    {"question": "6. 감정보다 논리를 더 중시하나요?", "dimension": "TF"},
-    {"question": "7. 상황에 따라 변화를 좋아하나요?", "dimension": "JP"},
-    {"question": "8. 사교적인 모임을 선호하나요?", "dimension": "EI"},
-    {"question": "9. 종종 사람들의 감정을 고려하나요?", "dimension": "TF"},
-    {"question": "10. 부정확한 정보를 듣고 흥미를 느끼나요?", "dimension": "SN"},
-]
+# 데이터: 나라, 수도, 국기 URL
+data = {
+    "국가": [
+        "대한민국", "미국", "일본", "중국", "영국",
+        "프랑스", "독일", "이탈리아", "스페인", "캐나다",
+        "호주", "브라질", "인도", "멕시코", "러시아",
+        "사우디아라비아", "네덜란드", "스웨덴", "노르웨이", "핀란드"
+    ],
+    "수도": [
+        "서울", "워싱턴 D.C.", "도쿄", "베이징", "런던",
+        "파리", "베를린", "로마", "마드리드", "오타와",
+        "캔버라", "브라질리아", "뉴델리", "멕시코시티", "모스크바",
+        "리야드", "암스테르담", "스톡홀름", "오슬로", "헬싱키"
+    ],
+    "국기": [
+        "https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg",
+        "https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/9/9e/Flag_of_Japan.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/0/0d/Flag_of_China.svg",
+        "https://upload.wikimedia.org/wikipedia/en/b/be/Flag_of_the_United_Kingdom.svg",
+        "https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg",
+        "https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/0/03/Flag_of_Italy.svg",
+        "https://upload.wikimedia.org/wikipedia/en/9/9a/Flag_of_Spain.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/bc/Flag_of_Canada.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Australia.svg",
+        "https://upload.wikimedia.org/wikipedia/en/0/05/Flag_of_Brazil.svg",
+        "https://upload.wikimedia.org/wikipedia/en/9/9c/Flag_of_India.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/f/fc/Flag_of_Mexico.svg",
+        "https://upload.wikimedia.org/wikipedia/en/f/f3/Flag_of_Russia.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/4/43/Flag_of_Saudi_Arabia.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/2/20/Flag_of_the_Netherlands.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/e/e0/Flag_of_Norway.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/b/b0/Flag_of_Finland.svg"
+    ]
+}
 
-# MBTI 계산 함수
-def calculate_mbti(responses):
-    scores = {"E": 0, "I": 0, "S": 0, "N": 0, "T": 0, "F": 0, "J": 0, "P": 0}
-    for idx, answer in enumerate(responses):
-        dimension = questions[idx]["dimension"]
-        if dimension == "EI":
-            scores["E"] += 1 if answer == "예" else scores["I"] += 1
-        elif dimension == "SN":
-            scores["N"] += 1 if answer == "예" else scores["S"] += 1
-        elif dimension == "TF":
-            scores["T"] += 1 if answer == "예" else scores["F"] += 1
-        elif dimension == "JP":
-            scores["J"] += 1 if answer == "예" else scores["P"] += 1
+# 데이터프레임 생성
+df = pd.DataFrame(data)
 
-    mbti = ""
-    mbti += "E" if scores["E"] >= scores["I"] else "I"
-    mbti += "S" if scores["S"] >= scores["N"] else "N"
-    mbti += "T" if scores["T"] >= scores["F"] else "F"
-    mbti += "J" if scores["J"] >= scores["P"] else "P"
-    return mbti
+# Streamlit 애플리케이션 제목
+st.title("세계 20개국의 수도와 국기")
 
-# Streamlit 인터페이스
-st.title("🔍 MBTI 간단 검사")
+# 데이터프레임 표시
+st.dataframe(df)
 
-# 세션 상태를 사용해 답변을 저장
-if "answers" not in st.session_state:
-    st.session_state.answers = [""] * len(questions)
+# 국기를 이미지로 표시
+st.write("각 국가의 국기:")
+for i in range(len(df)):
+    st.image(df["국기"][i], caption=df["국가"][i], width=100)
 
-# 질문 출력
-for idx, q in enumerate(questions):
-    st.session_state.answers[idx] = st.selectbox(
-        q["question"], 
-        ["", "예", "아니오"],  # 초기값으로 빈 문자열 추가!
-        index=0, 
-        key=f"q_{idx}"
-    )
-
-# 제출 버튼
-if st.button("결과 확인"):
-    if "" in st.session_state.answers:
-        st.warning("모든 질문에 답변해 주세요!")
-    else:
-        mbti_type = calculate_mbti(st.session_state.answers)
-        st.success(f"당신의 MBTI 유형은 **{mbti_type}** 입니다!")
