@@ -1,60 +1,42 @@
 import streamlit as st
 
-# 질문과 MBTI 차원 연결
+# 질문 목록
 questions = [
-    {"question": "1. 당신은 사람들 사이에서 에너지를 얻는 편인가요?", "dimension": "EI"},
-    {"question": "2. 계획을 세우는 것을 좋아하나요?", "dimension": "JP"},
-    {"question": "3. 새로운 아이디어를 생각하는 것이 흥미로운가요?", "dimension": "SN"},
-    {"question": "4. 타인을 돕는 것을 좋아하나요?", "dimension": "TF"},
-    {"question": "5. 즉흥적인 결정을 잘 내리나요?", "dimension": "JP"},
-    {"question": "6. 감정보다 논리를 더 중시하나요?", "dimension": "TF"},
-    {"question": "7. 상황에 따라 변화를 좋아하나요?", "dimension": "JP"},
-    {"question": "8. 사교적인 모임을 선호하나요?", "dimension": "EI"},
-    {"question": "9. 종종 사람들의 감정을 고려하나요?", "dimension": "TF"},
-    {"question": "10. 부정확한 정보를 듣고 흥미를 느끼나요?", "dimension": "SN"},
+    "1. 저는 새로운 사람을 만나는 것을 좋아합니다.",
+    "2. 계획 없이 즉흥적으로 행동하는 것을 선호합니다.",
+    "3. 감정보다 논리를 더 중시합니다.",
+    "4. 대규모 모임보다 소규모 모임이 더 편안합니다.",
+    "5. 개방적인 대화보다 깊이 있는 대화를 선호합니다.",
+    "6. 이론적인 아이디어를 제시하는 것을 좋아합니다.",
+    "7. 다른 사람의 기분을 잘 이해합니다.",
+    "8. 실패 보다 성공을 더 중시합니다.",
+    "9. 세부적인 것보다 전체적인 경향을 중요하게 생각합니다.",
+    "10. 무언가를 계획하고 미리 준비하는 것을 좋아합니다."
 ]
 
-# MBTI 계산 함수
-def calculate_mbti(responses):
-    scores = {"E": 0, "I": 0, "S": 0, "N": 0, "T": 0, "F": 0, "J": 0, "P": 0}
-    for idx, answer in enumerate(responses):
-        dimension = questions[idx]["dimension"]
-        if dimension == "EI":
-            scores["E"] += 1 if answer == "예" else scores["I"] += 1
-        elif dimension == "SN":
-            scores["N"] += 1 if answer == "예" else scores["S"] += 1
-        elif dimension == "TF":
-            scores["T"] += 1 if answer == "예" else scores["F"] += 1
-        elif dimension == "JP":
-            scores["J"] += 1 if answer == "예" else scores["P"] += 1
+# MBTI 설문 응답 초기화
+responses = []
 
-    mbti = ""
-    mbti += "E" if scores["E"] >= scores["I"] else "I"
-    mbti += "S" if scores["S"] >= scores["N"] else "N"
-    mbti += "T" if scores["T"] >= scores["F"] else "F"
-    mbti += "J" if scores["J"] >= scores["P"] else "P"
-    return mbti
+# Streamlit 애플리케이션 제목
+st.title("MBTI 유형 검사")
 
-# Streamlit 인터페이스
-st.title("🔍 MBTI 간단 검사")
+# 질문 출력 및 응답 수집
+for question in questions:
+    response = st.radio(question, options=["예", "아니오"], key=question)
+    responses.append(response)
 
-# 세션 상태를 사용해 답변을 저장
-if "answers" not in st.session_state:
-    st.session_state.answers = [""] * len(questions)
-
-# 질문 출력
-for idx, q in enumerate(questions):
-    st.session_state.answers[idx] = st.selectbox(
-        q["question"], 
-        ["", "예", "아니오"],  # 초기값으로 빈 문자열 추가!
-        index=0, 
-        key=f"q_{idx}"
-    )
-
-# 제출 버튼
+# 결과 확인 버튼
 if st.button("결과 확인"):
-    if "" in st.session_state.answers:
-        st.warning("모든 질문에 답변해 주세요!")
-    else:
-        mbti_type = calculate_mbti(st.session_state.answers)
-        st.success(f"당신의 MBTI 유형은 **{mbti_type}** 입니다!")
+    # MBTI 유형 계산
+    e_i = sum(1 for response in responses[:5] if response == "예")
+    t_f = sum(1 for response in responses[2:4] if response == "예") + sum(1 for response in responses[7:8] if response == "아니오")
+    j_p = sum(1 for response in responses[1:2] if response == "예") + sum(1 for response in responses[6:9] if response == "아니오")
+
+    # 유형 결정
+    e_i_type = "E" if e_i >= 3 else "I"
+    t_f_type = "T" if t_f >= 2 else "F"
+    j_p_type = "J" if j_p >= 2 else "P"
+
+    mbti_type = e_i_type + t_f_type + j_p_type
+    st.write(f"당신의 MBTI 유형은: **{mbti_type}**입니다.")
+
